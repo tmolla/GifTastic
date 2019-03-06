@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <style>
+        .btn{
+            margin:2px;
+        }
+        .image{
+            margin:3px;
+        }
+        .rating{
+            margin-left:3px;
+            margin-bottom: 0px;
+            margin-top:5px
+        }    
+        </style>
+    </head>
+
+<body>
+    <div class="button-container"></div>
+    <div class="image-container"
+    <!-- https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q=&limit=25&offset=0&rating=G&lang=en -->
+    <script type="text/javascript">
+        var topics = ["Dog", "Cat", "Bird", "Fish"]
+        for (var i = 0; i < topics.length; i++) {
+            //create a button element and set its attributes
+            //<button type="button" class="btn btn-info">Info</button>
+            var button = $("<button>");
+            button.attr("type", "button");
+            button.attr("data-index", i)
+            button.addClass("btn btn-info");
+            button.text(topics[i]);
+
+            //append button to button container
+            $(".button-container").append(button);
+        }
+
+        $(document.body).on("click", ".btn", function () {
+            $(".image-container").empty();
+            var index = $(this).attr("data-index");
+            alert("you clicked on button for " + topics[index]);
+            var queryString = "https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q="+ topics[index] +"&limit=10"
+            $.ajax({url:queryString,method:"Get"})
+                .done(function(response){
+                
+                    for(var i =0; i<response.data.length; i++){
+                        //console.log(response.data[i]);
+                        var image_div = $("<div>")
+                        image_div.attr("style", "display:inline-block");
+                        var image = $("<img>");
+                        image.addClass("image");
+                        image.attr("image-index", i);
+                        //image.attr("style", "margin:5px")
+                        image.attr("src", response.data[i].images['fixed_height_still'].url)
+                        image.attr("data-still",response.data[i].images['fixed_height_still'].url )
+                        image.attr("data-animate", response.data[i].images['fixed_height'].url)
+                        image.attr("data-state","still");
+                        image.addClass
+                        image_div.append(image);
+                        var rating = $("<p>");
+                        rating.addClass("rating");
+                        rating.html("Rating: " + response.data[i].rating);
+                        image_div.prepend(rating);
+                        $(".image-container").append(image_div);
+                    };
+                });
+        });
+        $(document.body).on("click", ".image", function(){
+            alert("you clicked on image");
+            var index = $(this).attr("image-index");
+            var state = $(this).attr("data-state");
+            if (state === "still"){
+                $(this).attr("src", $(this).attr("data-animate"));
+                $(this).attr("data-state","animate")
+            }else{
+                $(this).attr("src", $(this).attr("data-still"));
+                $(this).attr("data-state","still")
+            }
+        });
+    </script>
+</body>
+
+</html>
