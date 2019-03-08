@@ -1,0 +1,57 @@
+* {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+.btn{
+    margin:2px;
+}
+input {
+    max-width: 100%;
+} 
+.form-control {
+    width: 60% !important;
+}
+.image{
+    margin:0px;
+    margin-left:3px;
+    margin-right:3px;
+}
+.rating{
+    margin-left:3px;
+    margin-bottom: 10px;
+    margin-top:0px;
+    padding:0px;
+}    
+.form-group{
+    margin-top:10px;
+    margin-bottom:5px;
+}
+.form_container{
+   /* background-color: gold;*/
+    background-image: linear-gradient(to right, gold , cornsilk)
+}
+.jumbotron {
+    margin-top:0px;
+    padding-top:0px;
+    background:transparent;
+    /*background-color: cornsilk;*/
+
+}
+label{
+    color:white;
+    margin-bottom: 0px;
+}
+.container{
+    margin:auto;
+}
+.card{
+    margin-top:10px;
+    background-color: cornsilk;
+    /*background-image: linear-gradient(to right, gold , cornsilk)*/
+}
+.button-container{
+    display:inline-block;
+    background-color: cornsilk;
+}
+.ttt{
+    margin:5px;
+}

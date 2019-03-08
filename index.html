@@ -1,92 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <style>
-        .btn{
-            margin:2px;
-        }
-        .image{
-            margin:3px;
-        }
-        .rating{
-            margin-left:3px;
-            margin-bottom: 0px;
-            margin-top:5px
-        }    
-        </style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Document</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" type="text/css" href="assets/css/style.css">
     </head>
+    <body>
+        <div class="container border">
+            <div class="card mb-3">
+                <div class="row no-gutters">
+                    <div class="form_container col-md-3">
+                        <form class="m-2" >
+                            <div class="form-group form-inline justify-content-end">
+                                <label for="formGroupInput1">Topic:</label>
+                                <input type="text" class="form-control" id="formGroupInput1" placeholder="">
+                            </div>
+                            <div class="form-group form-inline justify-content-end">
+                                    <label for="formGroupInput2">limit:</label>
+                                    <select class="form-control" id="formGroupInput2">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    <option selected>10</option>
+                                    </select>
+                            </div> 
+                            <div class="form-group form-inline justify-content-end">
+                                    <label for="formGroupInput3">Max rating:</label>
+                                    <select class="form-control" id="formGroupInput3">
+                                    <option selected>All</any></option>
+                                    <option>y</option>
+                                    <option>g</option>
+                                    <option>pg</option>
+                                    <option>pg-13</option>
+                                    </select>
+                            </div>                          
+                            <button type="submit" class="btn btn-primary float-right">Add Topic</button>
+                        </form> 
+                    </div>
+                    <div class="col-md-9 bg-gradient-primary ">
+                        <div class="card-body">
+                            <div class="button-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="jumbotron col-md-12">
+                <div class="image-container"></div>
+            </div>
+        </div>
+        
+        <!-- https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q=&limit=25&offset=0&rating=G&lang=en -->
+        <script type="text/javascript">
+            //initialize with a few buttons to display some animals
+            var topics = [{"name":"Dog","limit":10, "rating":""}, {"name":"Cat","limit":10, "rating":""}]
+            displayImageButton();
+            
+            //Function displays image button
+            function displayImageButton(){
+                $(".button-container").empty();
+                for (var i = 0; i < topics.length; i++) {
+                    //create a button element and set its attributes
+                    var button = $("<button>");
+                    button.attr({'type': 'button', 'data-index': i})
+                    button.addClass("btn btn-info display-btn");
+                    button.text(topics[i].name);
 
-<body>
-    <div class="button-container"></div>
-    <div class="image-container"
-    <!-- https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q=&limit=25&offset=0&rating=G&lang=en -->
-    <script type="text/javascript">
-        var topics = ["Dog", "Cat", "Bird", "Fish"]
-        for (var i = 0; i < topics.length; i++) {
-            //create a button element and set its attributes
-            //<button type="button" class="btn btn-info">Info</button>
-            var button = $("<button>");
-            button.attr("type", "button");
-            button.attr("data-index", i)
-            button.addClass("btn btn-info");
-            button.text(topics[i]);
+                    //append button to button container
+                    $(".button-container").append(button);
+                };
+            };
 
-            //append button to button container
-            $(".button-container").append(button);
-        }
+            //----------------------------------------------------------------------
+            // Event listener to display button click.
+            // The function gets image from Gyphy using Gyphy api and display them
+            //---------------------------------------------------------------------
 
-        $(document.body).on("click", ".btn", function () {
-            $(".image-container").empty();
-            var index = $(this).attr("data-index");
-            alert("you clicked on button for " + topics[index]);
-            var queryString = "https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q="+ topics[index] +"&limit=10"
-            $.ajax({url:queryString,method:"Get"})
-                .done(function(response){
+            $(document.body).on("click", ".display-btn", function () {
+                $(".image-container").empty();              //clear the image container of any previous display
+                var index = $(this).attr("data-index");     //get the index to the topic array so we can get animal name
+                var queryString = "https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q="+ topics[index].name +"&limit=" + topics[index].limit +"&rating=" + topics[index].rating;
+                console.log(queryString);
+                $.ajax({url:queryString,method:"Get"})  //make the ajax call
+                    .done(function(response){   
+                    
+                        for(var i =0; i<response.data.length; i++){     //loop through the images returned and dispaly them
+                            //console.log(response.data[i]);
+                            //create image container
+                            var image_div = $("<div>") 
+                            image_div.attr("style", "display:inline-block");
+                            image_div.addClass("ttt");
+
+                            //create image element and append it to image container
+                            var image = $("<img>");
+                            image.addClass("image");
+                            image.attr("image-index", i); //save the topic index for future use
+                            image.attr("src", response.data[i].images['fixed_height_still'].url)
+                            image.attr("data-still",response.data[i].images['fixed_height_still'].url )
+                            image.attr("data-animate", response.data[i].images['fixed_height'].url)
+                            image.attr("data-state","still");   //make default display state still
+                            image_div.append(image);
+
+                            //create rating container and append it to the image container
+                            //<div class="d-flex justify-content-between">...</div>
+                            var rating = $("<div>");
+                            rating.addClass("rating");
+                            rating.addClass("d-flex justify-content-between")
+                            rating.append("<small>Rating: " + response.data[i].rating +"</small>");
+
+                        
+                            // <div class="custom-control custom-checkbox">
+                            //     <input type="checkbox" class="custom-control-input" id="defaultUnchecked">
+                            //     <label class="custom-control-label" for="defaultUnchecked">Default unchecked</label>
+                            // </div>
+
+
+                            var favorite = $("<input>");
+                            favorite.attr("imageIndex", i);
+                            favorite.attr("id", 'defaultUnchecked')
+                            favorite.attr("type","checkbox")
+                            favorite.addClass("favorite");
+                            rating.append(favorite);
+                            image_div.append(rating);
+                            $(".image-container").append(image_div);
+                        
+                            
+                        };
+                    });
+            });
+            
+            //---------------------------------------------------------------
+            // Event listener to image click.
+            // The function toggles between still and animated image.
+            //--------------------------------------------------------------
+            $(document.body).on("click", ".image", function(){
                 
-                    for(var i =0; i<response.data.length; i++){
-                        //console.log(response.data[i]);
-                        var image_div = $("<div>")
-                        image_div.attr("style", "display:inline-block");
-                        var image = $("<img>");
-                        image.addClass("image");
-                        image.attr("image-index", i);
-                        //image.attr("style", "margin:5px")
-                        image.attr("src", response.data[i].images['fixed_height_still'].url)
-                        image.attr("data-still",response.data[i].images['fixed_height_still'].url )
-                        image.attr("data-animate", response.data[i].images['fixed_height'].url)
-                        image.attr("data-state","still");
-                        image.addClass
-                        image_div.append(image);
-                        var rating = $("<p>");
-                        rating.addClass("rating");
-                        rating.html("Rating: " + response.data[i].rating);
-                        image_div.prepend(rating);
-                        $(".image-container").append(image_div);
-                    };
-                });
-        });
-        $(document.body).on("click", ".image", function(){
-            alert("you clicked on image");
-            var index = $(this).attr("image-index");
-            var state = $(this).attr("data-state");
-            if (state === "still"){
-                $(this).attr("src", $(this).attr("data-animate"));
-                $(this).attr("data-state","animate")
-            }else{
-                $(this).attr("src", $(this).attr("data-still"));
-                $(this).attr("data-state","still")
-            }
-        });
-    </script>
-</body>
+                var state = $(this).attr("data-state");                 //get the state of the display
+                if (state === "still"){                                 // if still image switch to animated one
+                    $(this).attr("src", $(this).attr("data-animate"));
+                    $(this).attr("data-state","animate")
+                }else{                                                  //else image is animated, switch to still one
+                    $(this).attr("src", $(this).attr("data-still"));
+                    $(this).attr("data-state","still")
+                }
+            });
 
+            //-------------------------------------------------------------------------------
+            // Event listener to submit button click.
+            // The function creats a button reprsenting the text entered in the input field.
+            //-------------------------------------------------------------------------------
+            $(".btn-primary").on("click", function(event){
+
+                event.preventDefault(); //prevent default action when submit button is clicked
+
+                var topic = $("#formGroupInput1").val().trim();  //get animal name entered
+                var limit = parseInt($("#formGroupInput2").val().trim());
+                var rating = $("#formGroupInput3").val().trim();
+                if (rating === "All"){
+                    rating = "";
+                };
+
+                var found = false;
+                var itemIndex = -1;
+                if (!(topic==="")){ //if there is something to add & not already in the list
+                    for (var i=0; i<topics.length; i++){
+                        //console.log("in loop " + i)
+                        var itemIndex = Object.values(topics[i]).indexOf(topic);
+                        //console.log("itemIndex is " + itemIndex);
+                        //console.log("looking at topic " + topics[i].name);
+                        if (itemIndex > -1){
+                            //console.log("found item " + topics[i])
+                            topics[i].rating = rating;
+                            topics[i].limit = limit;
+                            found = true;
+                            //console.log(topics[i])
+                            break;
+                        }
+                    }
+                    if (!found){
+                        console.log("did not find it.")
+                        topics.push ({"name":topic, "limit": limit, "rating": rating});           //add animal name to topics
+                    }
+                    displayImageButton()            //create button and display it
+                    $("#formGroupInput1").val("");   //clear input field
+                    // $("#formGroupInput2").val("");   //clear input field
+                    // $("#formGroupInput3").val("");   //clear input field
+                }
+            })
+            $(document.body).on("click", ".favorite", function(){
+                alert("you loved " + $(this).attr("imageIndex"));
+            })
+        </script>
+    </body>
 </html>
