@@ -31,7 +31,7 @@ input {
 }
 .jumbotron {
     margin-top:0px;
-    padding-top:0px;
+    padding:0px;
     background:transparent;
     /*background-color: cornsilk;*/
 
@@ -46,7 +46,7 @@ label{
 .card{
     margin-top:10px;
     background-color: cornsilk;
-    /*background-image: linear-gradient(to right, gold , cornsilk)*/
+    /* background-image: linear-gradient(to left, gold , cornsilk) */
 }
 .button-container{
     display:inline-block;

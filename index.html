@@ -20,10 +20,10 @@
                         <form class="m-2" >
                             <div class="form-group form-inline justify-content-end">
                                 <label for="formGroupInput1">Topic:</label>
-                                <input type="text" class="form-control" id="formGroupInput1" placeholder="">
+                                <input type="text" class="form-control" id="formGroupInput1" placeholder="Enter topic">
                             </div>
                             <div class="form-group form-inline justify-content-end">
-                                    <label for="formGroupInput2">limit:</label>
+                                    <label for="formGroupInput2">limit per click:</label>
                                     <select class="form-control" id="formGroupInput2">
                                     <option>1</option>
                                     <option>2</option>
@@ -34,20 +34,21 @@
                                     <option>7</option>
                                     <option>8</option>
                                     <option>9</option>
-                                    <option selected>10</option>
+                                    <option>10</option>
                                     </select>
                             </div> 
                             <div class="form-group form-inline justify-content-end">
                                     <label for="formGroupInput3">Max rating:</label>
                                     <select class="form-control" id="formGroupInput3">
-                                    <option selected>All</any></option>
+                                    <option>All</any></option>
                                     <option>y</option>
                                     <option>g</option>
                                     <option>pg</option>
                                     <option>pg-13</option>
                                     </select>
                             </div>                          
-                            <button type="submit" class="btn btn-primary float-right">Add Topic</button>
+                            <button type="submit" class="btn btn-primary display-favorite float-left">Show Favorite</button>
+                            <button type="submit" class="btn btn-primary float-right">Add/Update</button>
                         </form> 
                     </div>
                     <div class="col-md-9 bg-gradient-primary ">
@@ -61,85 +62,139 @@
                 <div class="image-container"></div>
             </div>
         </div>
-        
-        <!-- https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q=&limit=25&offset=0&rating=G&lang=en -->
+
         <script type="text/javascript">
             //initialize with a few buttons to display some animals
-            var topics = [{"name":"Dog","limit":10, "rating":""}, {"name":"Cat","limit":10, "rating":""}]
-            displayImageButton();
+            var topics = []; //[{"name":"Dog","limit":10, "rating":""}, {"name":"Cat","limit":10, "rating":""}]
+            var currentTopicIndex = -1
+            //var itemIndex = 0;
+
             
             //Function displays image button
             function displayImageButton(){
-                $(".button-container").empty();
+
+                //clear all button 
+                $(".button-container").empty(); 
+
+                //create a button element, set its attributes and display it
                 for (var i = 0; i < topics.length; i++) {
-                    //create a button element and set its attributes
                     var button = $("<button>");
                     button.attr({'type': 'button', 'data-index': i})
                     button.addClass("btn btn-info display-btn");
                     button.text(topics[i].name);
-
-                    //append button to button container
                     $(".button-container").append(button);
                 };
             };
 
+
+            function getImages(index)
+            {
+                var offset = 0;
+                if (topics[index]["image"].length > 0){
+                    offset = topics[index]["image"].length + topics[index].limit
+                }
+                //make ajax call, get records and display them
+                var queryString = "https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q="+ topics[index].name +"&limit=" + topics[index].limit + "&rating=" + topics[index].rating + "&offset=" + offset;
+                console.log(queryString);
+                $.ajax({url:queryString,method:"Get"}).done(function(response){   
+                    
+                    for(var i = 0; i<response.data.length; i++){     //loop through the images returned and dispaly them
+                        image = {
+                            "still-image": response.data[i].images['fixed_height_still'].url,
+                            "animated-image":response.data[i].images['fixed_height'].url,
+                            "rating":response.data[i].rating,
+                        }
+                        topics[index]["image"].push(image);
+                    };
+                    displayImage(topics[index]["image"], true);
+                });               
+            }
+
+            function displayImage(images, topicContent){
+                console.log("in displayimage image is ");
+                console.log(images);
+                console.log("the length of image is :" + images.length)
+
+                //empty images 
+                $(".image-container").empty();
+
+                for(var i = 0; i<images.length; i++){     //loop through the images returned and dispaly them
+                    console.log("in for loop");
+                    //create image container
+                    var image_div = $("<div>") 
+                    image_div.attr("style", "display:inline-block");
+                    image_div.addClass("ttt");
+
+                    //create image element and append it to image container
+                    var image = $("<img>");
+                    image.addClass("image");
+                    image.attr("image-index", i); //save the topic index for future use
+                    image.attr("src", images[i]["still-image"])
+                    image.attr("data-still",images[i]["still-image"])
+                    image.attr("data-animate", images[i]["animated-image"])
+                    image.attr("data-state","still");   //make default display state still
+                    image_div.append(image);
+
+                    //create rating container and append it to the image container
+                    var rating = $("<div>");
+                    rating.addClass("rating");
+                    rating.addClass("d-flex justify-content-between")
+                    rating.append("<small>Rating: " + images[i].rating +"</small>");
+
+                    //if displaying topic add a favorite check box and add it to image container
+                    if (topicContent) {
+                        var favoriteChkBox = $("<input>");
+                        favoriteChkBox.attr("imageIndex", i);
+                        favoriteChkBox.attr("id", 'defaultUnchecked')
+                        favoriteChkBox.attr("type","checkbox")
+                        favoriteChkBox.addClass("favorite");
+                        rating.append(favoriteChkBox);
+                    }
+                    image_div.append(rating);
+                    $(".image-container").prepend(image_div);
+                };
+            }
             //----------------------------------------------------------------------
             // Event listener to display button click.
             // The function gets image from Gyphy using Gyphy api and display them
             //---------------------------------------------------------------------
 
             $(document.body).on("click", ".display-btn", function () {
-                $(".image-container").empty();              //clear the image container of any previous display
+                console.log("in display-btn click" );
                 var index = $(this).attr("data-index");     //get the index to the topic array so we can get animal name
-                var queryString = "https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q="+ topics[index].name +"&limit=" + topics[index].limit +"&rating=" + topics[index].rating;
-                console.log(queryString);
-                $.ajax({url:queryString,method:"Get"})  //make the ajax call
-                    .done(function(response){   
-                    
-                        for(var i =0; i<response.data.length; i++){     //loop through the images returned and dispaly them
-                            //console.log(response.data[i]);
-                            //create image container
-                            var image_div = $("<div>") 
-                            image_div.attr("style", "display:inline-block");
-                            image_div.addClass("ttt");
-
-                            //create image element and append it to image container
-                            var image = $("<img>");
-                            image.addClass("image");
-                            image.attr("image-index", i); //save the topic index for future use
-                            image.attr("src", response.data[i].images['fixed_height_still'].url)
-                            image.attr("data-still",response.data[i].images['fixed_height_still'].url )
-                            image.attr("data-animate", response.data[i].images['fixed_height'].url)
-                            image.attr("data-state","still");   //make default display state still
-                            image_div.append(image);
-
-                            //create rating container and append it to the image container
-                            //<div class="d-flex justify-content-between">...</div>
-                            var rating = $("<div>");
-                            rating.addClass("rating");
-                            rating.addClass("d-flex justify-content-between")
-                            rating.append("<small>Rating: " + response.data[i].rating +"</small>");
-
-                        
-                            // <div class="custom-control custom-checkbox">
-                            //     <input type="checkbox" class="custom-control-input" id="defaultUnchecked">
-                            //     <label class="custom-control-label" for="defaultUnchecked">Default unchecked</label>
-                            // </div>
-
-
-                            var favorite = $("<input>");
-                            favorite.attr("imageIndex", i);
-                            favorite.attr("id", 'defaultUnchecked')
-                            favorite.attr("type","checkbox")
-                            favorite.addClass("favorite");
-                            rating.append(favorite);
-                            image_div.append(rating);
-                            $(".image-container").append(image_div);
-                        
-                            
-                        };
-                    });
+                console.log("currentTopicIndex " + currentTopicIndex);
+                console.log("index " + index)
+                if ((currentTopicIndex != index) && (topics[index]["image"].length > 0)) 
+                {
+                    console.log("in if")
+                    displayImage(topics[index]["image"],true);
+                }
+                else 
+                {
+                    getImages(index);
+                }
+                
+                //var limit = parseInt($("#formGroupInput2").val().trim());
+                //var rating = $("#formGroupInput3").val().trim();
+                currentTopicIndex = index;
+                console.log($(this).text())
+                $("#formGroupInput1").val($(this).text());
             });
+
+            //---------------------------------------------------------------
+            // Event listener to favorite button click.
+            // The function toggles between still and animated image.
+            //--------------------------------------------------------------
+            $(".display-favorite").on("click", function(){
+                currentTopicIndex = -1; //this is a trick to stop more images from being loaded when the topic display button is clicked
+                
+                $(".image-container").empty();
+                var images = JSON.parse(localStorage.getItem("favorites")); //get images from localStorage
+                if (Array.isArray(images)){         //if there any image is found display it
+                    displayImage(images, false);
+                }
+            });
+
             
             //---------------------------------------------------------------
             // Event listener to image click.
@@ -174,33 +229,50 @@
 
                 var found = false;
                 var itemIndex = -1;
-                if (!(topic==="")){ //if there is something to add & not already in the list
+                if (!(topic==="")){             //if there is something to add & not already in the list
                     for (var i=0; i<topics.length; i++){
-                        //console.log("in loop " + i)
                         var itemIndex = Object.values(topics[i]).indexOf(topic);
-                        //console.log("itemIndex is " + itemIndex);
-                        //console.log("looking at topic " + topics[i].name);
-                        if (itemIndex > -1){
-                            //console.log("found item " + topics[i])
+                        if (itemIndex > -1){    //console.log("found item " + topics[i])
                             topics[i].rating = rating;
                             topics[i].limit = limit;
-                            found = true;
-                            //console.log(topics[i])
+                            found = true;       //console.log(topics[i])
                             break;
                         }
                     }
                     if (!found){
                         console.log("did not find it.")
-                        topics.push ({"name":topic, "limit": limit, "rating": rating});           //add animal name to topics
+                        topics.push ({"name":topic, "limit": limit, "rating": rating, "image":[]});           //add animal name to topics
                     }
-                    displayImageButton()            //create button and display it
-                    $("#formGroupInput1").val("");   //clear input field
-                    // $("#formGroupInput2").val("");   //clear input field
-                    // $("#formGroupInput3").val("");   //clear input field
+
+                    //create button and display it
+                    displayImageButton()            
+                    
+                    //clean input fields and exit
+                    $("#formGroupInput1").val("");
+                    // $("#formGroupInput2").val("");
+                    // $("#formGroupInput3").val("");
                 }
             })
+
+
+            //-------------------------------------------------------------------------------
+            // Event listener to favorite checkbox click.
+            // The function creats a button reprsenting the text entered in the input field.
+            //-------------------------------------------------------------------------------
             $(document.body).on("click", ".favorite", function(){
-                alert("you loved " + $(this).attr("imageIndex"));
+                var imageIndex = $(this).attr("imageIndex");
+                alert("you loved " + imageIndex);
+                var images = JSON.parse(localStorage.getItem("favorites"));
+                console.log("from local storage");
+                console.log(images);
+                if (!Array.isArray(images)){ //localStrage exist, push image
+                    images = []  //initialize
+                } 
+                images.push(topics[currentTopicIndex]["image"][imageIndex]);
+                console.log("saved.image")
+                console.log(images);
+                // store back in local storage
+                localStorage.setItem("favorites",JSON.stringify(images))
             })
         </script>
     </body>
