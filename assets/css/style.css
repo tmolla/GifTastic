@@ -1,8 +1,13 @@
 * {
     font-family: Georgia, 'Times New Roman', Times, serif;
 }
+body {
+    background-image: url(../images/background.jpeg);
+    background-repeat:no-repeat;
+    background-size: cover;
+}
 .btn{
-    margin:2px;
+    margin:5px;
 }
 input {
     max-width: 100%;
@@ -37,14 +42,16 @@ input {
 
 }
 label{
-    color:white;
+    font-size: x-large;
+    color:blue;
     margin-bottom: 0px;
 }
 .container{
     margin:auto;
 }
 .card{
-    margin-top:10px;
+    margin:10px;
+    margin-bottom: 20px;
     background-color: cornsilk;
     /* background-image: linear-gradient(to left, gold , cornsilk) */
 }

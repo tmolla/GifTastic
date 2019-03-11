@@ -22,33 +22,8 @@
                                 <label for="formGroupInput1">Topic:</label>
                                 <input type="text" class="form-control" id="formGroupInput1" placeholder="Enter topic">
                             </div>
-                            <div class="form-group form-inline justify-content-end">
-                                    <label for="formGroupInput2">limit per click:</label>
-                                    <select class="form-control" id="formGroupInput2">
-                                    <option>1</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
-                                    <option>6</option>
-                                    <option>7</option>
-                                    <option>8</option>
-                                    <option>9</option>
-                                    <option>10</option>
-                                    </select>
-                            </div> 
-                            <div class="form-group form-inline justify-content-end">
-                                    <label for="formGroupInput3">Max rating:</label>
-                                    <select class="form-control" id="formGroupInput3">
-                                    <option>All</any></option>
-                                    <option>y</option>
-                                    <option>g</option>
-                                    <option>pg</option>
-                                    <option>pg-13</option>
-                                    </select>
-                            </div>                          
-                            <button type="submit" class="btn btn-primary display-favorite float-left">Show Favorite</button>
-                            <button type="submit" class="btn btn-primary float-right">Add/Update</button>
+                            <button type="submit" class="btn btn-primary add-topic float-right">Add Topic</button>
+                            <button type="submit" class="btn btn-primary display-favorite float-right">Show Favorites</button>
                         </form> 
                     </div>
                     <div class="col-md-9 bg-gradient-primary ">
@@ -63,14 +38,16 @@
             </div>
         </div>
 
-        <script type="text/javascript">
-            //initialize with a few buttons to display some animals
-            var topics = []; //[{"name":"Dog","limit":10, "rating":""}, {"name":"Cat","limit":10, "rating":""}]
-            var currentTopicIndex = -1
-            //var itemIndex = 0;
+        <script src="assets/javascript/script.js"></script>
+        <!--     //-----------------------------------------
+            //global variables
+            //-----------------------------------------
+            var topics = []; //variable for holding topic related information
+            var currentTopicIndex = -1; //keeps track of the current selected topic
 
-            
-            //Function displays image button
+            //-----------------------------------
+            //Function displays topic button
+            //----------------------------------
             function displayImageButton(){
 
                 //clear all button 
@@ -87,6 +64,9 @@
             };
 
 
+            //-------------------------------------------------------
+            //function to retrieve images from Gyphy and display them
+            //-------------------------------------------------------
             function getImages(index)
             {
                 var offset = 0;
@@ -95,7 +75,6 @@
                 }
                 //make ajax call, get records and display them
                 var queryString = "https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q="+ topics[index].name +"&limit=" + topics[index].limit + "&rating=" + topics[index].rating + "&offset=" + offset;
-                console.log(queryString);
                 $.ajax({url:queryString,method:"Get"}).done(function(response){   
                     
                     for(var i = 0; i<response.data.length; i++){     //loop through the images returned and dispaly them
@@ -110,16 +89,16 @@
                 });               
             }
 
+
+            //------------------------------------------
+            //A funciton to display images
+            //------------------------------------------
             function displayImage(images, topicContent){
-                console.log("in displayimage image is ");
-                console.log(images);
-                console.log("the length of image is :" + images.length)
 
                 //empty images 
                 $(".image-container").empty();
 
                 for(var i = 0; i<images.length; i++){     //loop through the images returned and dispaly them
-                    console.log("in for loop");
                     //create image container
                     var image_div = $("<div>") 
                     image_div.attr("style", "display:inline-block");
@@ -154,19 +133,16 @@
                     $(".image-container").prepend(image_div);
                 };
             }
+
             //----------------------------------------------------------------------
             // Event listener to display button click.
-            // The function gets image from Gyphy using Gyphy api and display them
+            // The function calls other funciton to get images from Gyphy and display them
             //---------------------------------------------------------------------
-
             $(document.body).on("click", ".display-btn", function () {
-                console.log("in display-btn click" );
+
                 var index = $(this).attr("data-index");     //get the index to the topic array so we can get animal name
-                console.log("currentTopicIndex " + currentTopicIndex);
-                console.log("index " + index)
                 if ((currentTopicIndex != index) && (topics[index]["image"].length > 0)) 
                 {
-                    console.log("in if")
                     displayImage(topics[index]["image"],true);
                 }
                 else 
@@ -174,17 +150,14 @@
                     getImages(index);
                 }
                 
-                //var limit = parseInt($("#formGroupInput2").val().trim());
-                //var rating = $("#formGroupInput3").val().trim();
                 currentTopicIndex = index;
-                console.log($(this).text())
                 $("#formGroupInput1").val($(this).text());
             });
 
-            //---------------------------------------------------------------
+            //----------------------------------------------------------------------
             // Event listener to favorite button click.
-            // The function toggles between still and animated image.
-            //--------------------------------------------------------------
+            // The callback function gets stored favorite images and displays them.
+            //----------------------------------------------------------------------
             $(".display-favorite").on("click", function(){
                 currentTopicIndex = -1; //this is a trick to stop more images from being loaded when the topic display button is clicked
                 
@@ -214,33 +187,28 @@
 
             //-------------------------------------------------------------------------------
             // Event listener to submit button click.
-            // The function creats a button reprsenting the text entered in the input field.
+            // The function creats a button reprsenting the topic entered in the input field.
             //-------------------------------------------------------------------------------
             $(".btn-primary").on("click", function(event){
 
                 event.preventDefault(); //prevent default action when submit button is clicked
 
                 var topic = $("#formGroupInput1").val().trim();  //get animal name entered
-                var limit = parseInt($("#formGroupInput2").val().trim());
-                var rating = $("#formGroupInput3").val().trim();
-                if (rating === "All"){
-                    rating = "";
-                };
-
+                var limit = 10; //number of images to get per click
+                var rating = ""; 
                 var found = false;
                 var itemIndex = -1;
                 if (!(topic==="")){             //if there is something to add & not already in the list
                     for (var i=0; i<topics.length; i++){
                         var itemIndex = Object.values(topics[i]).indexOf(topic);
-                        if (itemIndex > -1){    //console.log("found item " + topics[i])
+                        if (itemIndex > -1){    
                             topics[i].rating = rating;
                             topics[i].limit = limit;
-                            found = true;       //console.log(topics[i])
+                            found = true;       
                             break;
                         }
                     }
                     if (!found){
-                        console.log("did not find it.")
                         topics.push ({"name":topic, "limit": limit, "rating": rating, "image":[]});           //add animal name to topics
                     }
 
@@ -249,31 +217,24 @@
                     
                     //clean input fields and exit
                     $("#formGroupInput1").val("");
-                    // $("#formGroupInput2").val("");
-                    // $("#formGroupInput3").val("");
                 }
             })
 
-
             //-------------------------------------------------------------------------------
             // Event listener to favorite checkbox click.
-            // The function creats a button reprsenting the text entered in the input field.
+            // The function persists favorite images.
             //-------------------------------------------------------------------------------
             $(document.body).on("click", ".favorite", function(){
                 var imageIndex = $(this).attr("imageIndex");
-                alert("you loved " + imageIndex);
                 var images = JSON.parse(localStorage.getItem("favorites"));
-                console.log("from local storage");
-                console.log(images);
-                if (!Array.isArray(images)){ //localStrage exist, push image
+                 if (!Array.isArray(images)){ //localStrage exist, push image
                     images = []  //initialize
                 } 
                 images.push(topics[currentTopicIndex]["image"][imageIndex]);
-                console.log("saved.image")
-                console.log(images);
+
                 // store back in local storage
                 localStorage.setItem("favorites",JSON.stringify(images))
             })
-        </script>
+        </script> -->
     </body>
 </html>

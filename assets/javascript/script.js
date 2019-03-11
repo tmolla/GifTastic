@@ -1,0 +1,196 @@
+//-----------------------------------------
+//global variables
+//-----------------------------------------
+var topics = []; //variable for holding topic related information
+var currentTopicIndex = -1; //keeps track of the current selected topic
+
+//-----------------------------------
+//Function displays topic button
+//----------------------------------
+function displayImageButton(){
+
+    //clear all button 
+    $(".button-container").empty(); 
+
+    //create a button element, set its attributes and display it
+    for (var i = 0; i < topics.length; i++) {
+        var button = $("<button>");
+        button.attr({'type': 'button', 'data-index': i})
+        button.addClass("btn btn-info display-btn");
+        button.text(topics[i].name);
+        $(".button-container").append(button);
+    };
+};
+
+
+//-------------------------------------------------------
+//function to retrieve images from Gyphy and display them
+//-------------------------------------------------------
+function getImages(index)
+{
+    var offset = 0;
+    if (topics[index]["image"].length > 0){
+        offset = topics[index]["image"].length + topics[index].limit
+    }
+    //make ajax call, get records and display them
+    var queryString = "https://api.giphy.com/v1/gifs/search?api_key=OyE69gvaihjJLrnq2tUp0bHZiEPWWtQp&q="+ topics[index].name +"&limit=" + topics[index].limit + "&rating=" + topics[index].rating + "&offset=" + offset;
+    $.ajax({url:queryString,method:"Get"}).done(function(response){   
+        
+        for(var i = 0; i<response.data.length; i++){     //loop through the images returned and dispaly them
+            image = {
+                "still-image": response.data[i].images['fixed_height_still'].url,
+                "animated-image":response.data[i].images['fixed_height'].url,
+                "rating":response.data[i].rating,
+            }
+            topics[index]["image"].push(image);
+        };
+        displayImage(topics[index]["image"], true);
+    });               
+}
+
+
+//------------------------------------------
+//A funciton to display images
+//------------------------------------------
+function displayImage(images, topicContent){
+
+    //empty images 
+    $(".image-container").empty();
+
+    for(var i = 0; i<images.length; i++){     //loop through the images returned and dispaly them
+        //create image container
+        var image_div = $("<div>") 
+        image_div.attr("style", "display:inline-block");
+        image_div.addClass("ttt");
+
+        //create image element and append it to image container
+        var image = $("<img>");
+        image.addClass("image");
+        image.attr("image-index", i); //save the topic index for future use
+        image.attr("src", images[i]["still-image"])
+        image.attr("data-still",images[i]["still-image"])
+        image.attr("data-animate", images[i]["animated-image"])
+        image.attr("data-state","still");   //make default display state still
+        image_div.append(image);
+
+        //create rating container and append it to the image container
+        var rating = $("<div>");
+        rating.addClass("rating");
+        rating.addClass("d-flex justify-content-between")
+        rating.append("<small>Rating: " + images[i].rating +"</small>");
+
+        //if displaying topic add a favorite check box and add it to image container
+        if (topicContent) {
+            var favoriteChkBox = $("<input>");
+            favoriteChkBox.attr("imageIndex", i);
+            favoriteChkBox.attr("id", 'defaultUnchecked')
+            favoriteChkBox.attr("type","checkbox")
+            favoriteChkBox.addClass("favorite");
+            rating.append(favoriteChkBox);
+        }
+        image_div.append(rating);
+        $(".image-container").prepend(image_div);
+    };
+}
+
+//----------------------------------------------------------------------
+// Event listener to display button click.
+// The function calls other funciton to get images from Gyphy and display them
+//---------------------------------------------------------------------
+$(document.body).on("click", ".display-btn", function () {
+
+    var index = $(this).attr("data-index");     //get the index to the topic array so we can get animal name
+    if ((currentTopicIndex != index) && (topics[index]["image"].length > 0)) 
+    {
+        displayImage(topics[index]["image"],true);
+    }
+    else 
+    {
+        getImages(index);
+    }
+    
+    currentTopicIndex = index;
+    $("#formGroupInput1").val($(this).text());
+});
+
+//----------------------------------------------------------------------
+// Event listener to favorite button click.
+// The callback function gets stored favorite images and displays them.
+//----------------------------------------------------------------------
+$(".display-favorite").on("click", function(){
+    currentTopicIndex = -1; //this is a trick to stop more images from being loaded when the topic display button is clicked
+    
+    $(".image-container").empty();
+    var images = JSON.parse(localStorage.getItem("favorites")); //get images from localStorage
+    if (Array.isArray(images)){         //if there any image is found display it
+        displayImage(images, false);
+    }
+});
+
+
+//---------------------------------------------------------------
+// Event listener to image click.
+// The function toggles between still and animated image.
+//--------------------------------------------------------------
+$(document.body).on("click", ".image", function(){
+    
+    var state = $(this).attr("data-state");                 //get the state of the display
+    if (state === "still"){                                 // if still image switch to animated one
+        $(this).attr("src", $(this).attr("data-animate"));
+        $(this).attr("data-state","animate")
+    }else{                                                  //else image is animated, switch to still one
+        $(this).attr("src", $(this).attr("data-still"));
+        $(this).attr("data-state","still")
+    }
+});
+
+//-------------------------------------------------------------------------------
+// Event listener to submit button click.
+// The function creats a button reprsenting the topic entered in the input field.
+//-------------------------------------------------------------------------------
+$(".btn-primary").on("click", function(event){
+
+    event.preventDefault(); //prevent default action when submit button is clicked
+
+    var topic = $("#formGroupInput1").val().trim();  //get animal name entered
+    var limit = 10; //number of images to get per click
+    var rating = ""; 
+    var found = false;
+    var itemIndex = -1;
+    if (!(topic==="")){             //if there is something to add & not already in the list
+        for (var i=0; i<topics.length; i++){
+            var itemIndex = Object.values(topics[i]).indexOf(topic);
+            if (itemIndex > -1){    
+                topics[i].rating = rating;
+                topics[i].limit = limit;
+                found = true;       
+                break;
+            }
+        }
+        if (!found){
+            topics.push ({"name":topic, "limit": limit, "rating": rating, "image":[]});           //add animal name to topics
+        }
+
+        //create button and display it
+        displayImageButton()            
+        
+        //clean input fields and exit
+        $("#formGroupInput1").val("");
+    }
+})
+
+//-------------------------------------------------------------------------------
+// Event listener to favorite checkbox click.
+// The function persists favorite images.
+//-------------------------------------------------------------------------------
+$(document.body).on("click", ".favorite", function(){
+    var imageIndex = $(this).attr("imageIndex");
+    var images = JSON.parse(localStorage.getItem("favorites"));
+        if (!Array.isArray(images)){ //localStrage exist, push image
+        images = []  //initialize
+    } 
+    images.push(topics[currentTopicIndex]["image"][imageIndex]);
+
+    // store back in local storage
+    localStorage.setItem("favorites",JSON.stringify(images))
+})
